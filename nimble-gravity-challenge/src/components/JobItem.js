@@ -38,7 +38,7 @@ const JobItem = ({ job, candidateData, onApply }) => {
         uuid: candidateData.uuid,
         jobId: job.id,
         candidateId: candidateData.candidateId,
-        applicationId: candidateData.applicationId, // AGREGADO
+        applicationId: candidateData.applicationId, // agregue este campo ante el error de invalid body
         repoUrl: repoUrl
       };
 
