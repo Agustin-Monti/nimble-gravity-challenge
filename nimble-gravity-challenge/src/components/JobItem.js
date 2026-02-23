@@ -15,23 +15,35 @@ const JobItem = ({ job, candidateData, onApply }) => {
       return;
     }
 
-    // Validación básica de URL de GitHub
-    if (!repoUrl.includes('github.com')) {
-      setError('Por favor ingresá una URL válida de GitHub');
-      return;
-    }
-
     setIsSubmitting(true);
     setError('');
 
     try {
+      // Verificar todos los datos del candidato
+      console.log('CandidateData completo:', candidateData);
+      console.log('Campos disponibles:', Object.keys(candidateData));
+      
+      // Asegurarnos de que los campos existen
+      if (!candidateData.uuid) {
+        throw new Error('No se encontró el UUID del candidato');
+      }
+      if (!candidateData.candidateId) {
+        throw new Error('No se encontró el candidateId');
+      }
+      if (!job.id) {
+        throw new Error('No se encontró el ID del trabajo');
+      }
+      
       const applicationData = {
         uuid: candidateData.uuid,
         jobId: job.id,
         candidateId: candidateData.candidateId,
+        applicationId: candidateData.applicationId, // AGREGADO
         repoUrl: repoUrl
       };
 
+      console.log('Enviando aplicación con estos datos exactos:', applicationData);
+      
       const result = await onApply(applicationData);
       
       if (result.ok) {
@@ -40,7 +52,15 @@ const JobItem = ({ job, candidateData, onApply }) => {
         setTimeout(() => setSuccess(false), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al enviar la postulación');
+      console.error('Error completo:', err);
+      console.error('Respuesta del servidor:', err.response?.data);
+      console.error('Detalles específicos:', err.response?.data?.details);
+      
+      const errorMessage = err.response?.data?.details?.message || 
+                          err.response?.data?.error || 
+                          err.message || 
+                          'Error al enviar la postulación';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
